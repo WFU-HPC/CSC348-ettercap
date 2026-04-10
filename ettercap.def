@@ -1,0 +1,45 @@
+Bootstrap: docker
+From: ubuntu:24.04
+
+%labels
+    Author Cody Stevens
+    Version 1.0
+    Description Ubuntu-based lab environment for Ettercap ARP poisoning man in the middle attacks.
+
+%post
+    # Prevent interactive prompts during installation (like timezone selection)
+    export DEBIAN_FRONTEND=noninteractive
+
+    # Update and install core security/networking/vnc tools
+    apt-get update && apt-get install -y \
+        build-essential debhelper bison check cmake firefox flex git \
+        groff libbsd-dev libcurl4-openssl-dev libmaxminddb-dev \
+        libgtk-3-dev libltdl-dev libluajit-5.1-dev libncurses-dev \
+        libnet1-dev libpcap-dev libpcre2-dev libssl-dev iproute2 \
+        iputils-ping net-tools tcpdump curl nano vim iptables wireshark-common \
+        tigervnc-standalone-server tigervnc-xorg-extension xfce4 xfce4-goodies dbus-x11
+
+    # Clean up to keep the image slim
+    apt-get clean
+    rm -rf /var/lib/apt/lists/*
+
+    # Install ettercap
+    cd /opt/ && git clone https://github.com/Ettercap/ettercap.git
+    mkdir ettercap/build && cd ettercap/build
+    cmake .. && make && make install
+
+    # Update ettercap configuration to enable IP address forwarding
+    sed -i '/REDIRECT/s/^#//' /usr/local/etc/ettercap/etter.conf
+
+%environment
+    # Set the prompt to remind you you're inside the container
+    export PS1="\[\e[31m\][Ettercap-Security-Lab] \[\e[m\]\w \$ "
+
+%runscript
+    echo "Container started. Use 'ettercap -h' to see options."
+    exec /bin/bash
+
+%help
+    This container is pre-configured with Ettercap and networking tools.
+    To run with full network capabilities, use:
+    sudo apptainer shell --net --network my_network_name --hostname ettercap-container --add-caps NET_RAW,NET_ADMIN ettercap.sif
