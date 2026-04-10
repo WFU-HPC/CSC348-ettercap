@@ -2,7 +2,12 @@
 An apptainer implmentation for ARP poisoning across containers running on Amazon EC2
 
 ## Installation
-### Enable seuid
+### Enable IP address forwarding
+```
+echo 1 > /proc/sys/net/ipv4/ip_forward
+```
+
+### Enable setuid
 ```
 sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
 apt-get install -y uidmap
