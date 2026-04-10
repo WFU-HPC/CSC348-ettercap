@@ -2,6 +2,12 @@
 An apptainer implmentation for ARP poisoning across containers running on Amazon EC2
 
 ## Installation
+### Enable seuid
+```
+sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+apt-get install -y uidmap
+```
+
 ### Install Go
 ```
 wget https://go.dev/dl/go1.26.2.linux-amd64.tar.gz
@@ -23,3 +29,36 @@ cd /opt/src/apptainer/apptainer-1.4.5/builddir
 make
 make install
 ```
+
+### Configure Network Bridge
+```
+apt-get install -y containernetworking-plugins
+mkdir -p /opt/cni/bin
+ln -s /usr/lib/cni/* /opt/cni/bin/
+mkdir -p /etc/cni/net.d
+
+cat > /etc/cni/net.d/bridge_name.conflist << EOF
+{
+    "cniVersion": "0.4.0",
+    "name": "bridge_name",
+    "plugins": [
+        {
+            "type": "bridge",
+            "bridge": "bridge_name-br0",
+            "isGateway": true,
+            "ipMasq": true,
+            "ipam": {
+                "type": "host-local",
+                "subnet": "10.22.0.0/24",
+                "routes": [
+                    { "dst": "0.0.0.0/0" }
+                ]
+            }
+        },
+        {
+            "type": "portmap",
+            "capabilities": {"portMappings": true}
+        }
+    ]
+}
+EOF
