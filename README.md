@@ -107,6 +107,8 @@ ssh -L 5902:10.22.0.3:5902 seed@ettercap.USER.cs.ar53.wfu.edu
 
 Then within VNC Viewer you should be able to connect to ```localhost:5901``` to connect to the VNC server within your attacker container and `localhost:5902` to connect to your victim container.
 
+![VNC](images/vnc.png)
+
 ### Starting VNC Applications
 
 #### Starting Ettercap
