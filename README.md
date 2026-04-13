@@ -67,3 +67,9 @@ cat > /etc/cni/net.d/bridge_name.conflist << EOF
     ]
 }
 EOF
+
+### Add iptables rules for IP forwarding
+```
+iptables -A FORWARD -i 1234567890-br0 -o ens5 -j ACCEPT
+iptables -A FORWARD -i ens5 -o 1234567890-br0 -m state --state RELATED,ESTABLISHED -j ACCEPT
+```
