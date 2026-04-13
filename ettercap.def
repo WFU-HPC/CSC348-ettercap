@@ -4,20 +4,24 @@ From: ubuntu:24.04
 %labels
     Author Cody Stevens
     Version 1.0
-    Description Ubuntu-based lab environment for Ettercap ARP poisoning man in the middle attacks.
+    Description Ubuntu-based lab for Ettercap ARP poisoning simulations.
 
 %post
     # Prevent interactive prompts during installation (like timezone selection)
     export DEBIAN_FRONTEND=noninteractive
 
-    # Update and install core security/networking/vnc tools
+    # Update and install core security/networking tools
     apt-get update && apt-get install -y \
-        build-essential debhelper bison check cmake firefox flex git \
+        build-essential debhelper bison check cmake flex git wget \
         groff libbsd-dev libcurl4-openssl-dev libmaxminddb-dev \
         libgtk-3-dev libltdl-dev libluajit-5.1-dev libncurses-dev \
-        libnet1-dev libpcap-dev libpcre2-dev libssl-dev iproute2 \
+        libnet1-dev libpcap-dev libpcre2-dev libssl-dev iproute2 traceroute \
         iputils-ping net-tools tcpdump curl nano vim iptables wireshark-common \
         tigervnc-standalone-server tigervnc-xorg-extension xfce4 xfce4-goodies dbus-x11
+
+    # Install Google Chrome
+    wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+    apt install -y ./google-chrome-stable_current_amd64.deb
 
     # Clean up to keep the image slim
     apt-get clean
@@ -33,7 +37,7 @@ From: ubuntu:24.04
 
 %environment
     # Set the prompt to remind you you're inside the container
-    export PS1="\[\e[31m\][Ettercap-Security-Lab] \[\e[m\]\w \$ "
+    export PS1="\[\e[31m\][Apptainer-Security-Lab] \[\e[m\]\w \$ "
 
 %runscript
     echo "Container started. Use 'ettercap -h' to see options."
@@ -42,4 +46,4 @@ From: ubuntu:24.04
 %help
     This container is pre-configured with Ettercap and networking tools.
     To run with full network capabilities, use:
-    sudo apptainer shell --net --network my_network_name --hostname ettercap-container --add-caps NET_RAW,NET_ADMIN ettercap.sif
+    sudo apptainer shell --net --network bridge_name --hostname seed-container --dns 8.8.8.8 --add-caps NET_RAW,NET_ADMIN ettercap.sif
