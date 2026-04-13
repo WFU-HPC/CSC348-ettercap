@@ -116,9 +116,13 @@ Within your VNC session you can start the Ettercap GUI by opening a terminal and
 ettercap -G
 ```
 
+![Ettercap](images/ettercap.png)
+
 #### Starting Wireshark
 
-To start Wireshark you can use the Applications menu in the upper left corner of the desktop and select Applications -> Internet -> Wireshark
+To start Wireshark you can use the Applications menu in the upper left corner of the desktop and select **Applications** -> **Internet** -> **Wireshark**
+
+![Wireshark](images/wireshark.png)
 
 #### Starting Google Chrome
 
@@ -126,6 +130,8 @@ To open a Google Chrome web browser you can execute the following command in you
 ```
 google-chrome --no-sandbox 2> /dev/null
 ```
+
+![Google Chrome](images/google-chrome.png)
 
 ## Installation
 ### Enable IP address forwarding
