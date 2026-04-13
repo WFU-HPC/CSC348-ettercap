@@ -67,6 +67,7 @@ cat > /etc/cni/net.d/bridge_name.conflist << EOF
     ]
 }
 EOF
+```
 
 ### Add iptables rules for IP forwarding
 ```
