@@ -36,6 +36,7 @@ You can always verify the IP address that was assigned to your container with th
 ```
 ip a
 ```
+<details>
 <summary> IP Info Example: </summary>
 ```
 2: eth0@if5: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP group default 
@@ -45,6 +46,7 @@ ip a
     inet6 fe80::e865:98ff:fe60:38e7/64 scope link 
        valid_lft forever preferred_lft forever
 ```
+<\details>
 
 
 ## Installation
