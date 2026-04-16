@@ -24,7 +24,7 @@ sudo ./start_attacker.sh
 ```
 This script is essentially a wrapper script that deploys the Apptainer container with the following options:
 ```
-apptainer shell --net --network 1234567890 --hostname seed-container --dns 8.8.8.8 --add-caps NET_RAW,NET_ADMIN ettercap.sif
+apptainer shell --net --network 1234567890 --network-args "portmap=5901:5901/tcp" --hostname seed-container --dns 8.8.8.8 --add-caps NET_RAW,NET_ADMIN ettercap.sif
 ```
 
 You should see the following prompt if the container successfully deployed
@@ -32,7 +32,12 @@ You should see the following prompt if the container successfully deployed
 [Apptainer-Security-Lab] /home/seed $
 ```
 
-This container is connected to an isolated network within your VM, and each time you deploy a container it will receive a new IP address within the IP range `10.22.0.0/24`. The default gateway for this VLAN is `10.22.0.1` and you should always see that default gateway IP no matter the number of containers you deploy. The first container you deploy within your VM will have the IP `10.22.0.2`, the second will have the IP `10.22.0.3`, and so on.
+After deploying the attacking container you should run the following command to improve VNC performance on the victim container after you perform your ARP poison attack:
+```
+echo 1 > /proc/sys/net/ipv4/ip_forward
+```
+
+This container is connected to an isolated network within your VM, and each time you deploy a the attacking container it will receive the IP address `10.22.020/24`. The default gateway for this VLAN is `10.22.0.1` and you should always see that default gateway IP no matter the number of containers you deploy. After deploying the attacking container, second victim container will have the IP `10.22.0.3`.
 
 You can always verify the IP address that was assigned to your container with the command `ip a`
 ```
@@ -60,10 +65,10 @@ sudo ./start_victim.sh
 ```
 This script is essentially a wrapper script that deploys the same Apptainer container with slightly different options:
 ```
-apptainer shell --net --network 1234567890 --hostname seed-container --dns 8.8.8.8 ettercap.sif
+apptainer shell --net --network 1234567890 --network-args "portmap=5902:5902/tcp" --hostname seed-container --dns 8.8.8.8 ettercap.sif
 ```
 
-If this is the second container you have deployed then it should receive the IP addresss `10.22.0.3` and you should be able to `ping` the attacker container using the network bridge if you know its IP address.
+If you deployed this container after deploying the attacker then it should receive the IP addresss `10.22.0.3` and you should be able to `ping` the attacker container using the network bridge if you know its IP address.
 
 ```
 ping 10.22.0.2
@@ -94,18 +99,10 @@ For the victim container you should use `:2` for the port.
 tigervncserver :2 -localhost no -geometry 1920x1080 -depth 24 -xstartup /usr/bin/startxfce4
 ```
 
-To connect to VNC you will then need to create another SSH session to create a connection from the attacking container's VNC server to your local computer. Using the IP address you found before with ```ip a``` and use the ```-L``` option to map your local port 5901 to the VM's port 5901 which is running the VNC server.
-```
-ssh -L 5901:10.22.0.2:5901 seed@ettercap.USER.cs.ar53.wfu.edu
-```
-
-To connect to the VNC server running on the victim container you will want to adjust your SSH command to map a different port on your local computer, i.e. `5902`, to the IP address and remote port for the victim container.
-```
-ssh -L 5902:10.22.0.3:5902 seed@ettercap.USER.cs.ar53.wfu.edu
-```
+To connect to VNC you will need to use an application such as VNC Viewer to connect to your containers host. Each container's VNC port is mapped to the EC2 instance's VNC port and you should be able to connect directly using your VM's FQDN.
 
 
-Then within VNC Viewer you should be able to connect to ```localhost:5901``` to connect to the VNC server within your attacker container and `localhost:5902` to connect to your victim container.
+Then within VNC Viewer you should be able to connect to ```ettercap.USER.cs.ar53.wfu.edu:5901``` to connect to the VNC server within your attacker container and `ettercap.USER.cs.ar53.wfu.edu:5902` to connect to your victim container where `USER` is your username.
 
 ![VNC](images/vnc.png)
 
@@ -119,6 +116,8 @@ ettercap -G
 ```
 
 ![Ettercap](images/ettercap.png)
+
+**NOTE**: When performing the APR poison attack on the victim container, ensure Target 1 is the default Gateway `10.22.0.1` and Target 2 is the victim container's IP `10.22.0.3` and ensure both **Sniff remote connections** and **Only poison one-way** are checked before performing the attack.
 
 #### Starting Wireshark
 
